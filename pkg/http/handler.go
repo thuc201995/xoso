@@ -9,22 +9,47 @@ import (
 	"net/http"
 )
 
-// makeFooHandler creates the handler logic
-func makeFooHandler(m *http.ServeMux, endpoints endpoint.Endpoints, options []http1.ServerOption) {
-	m.Handle("/foo", http1.NewServer(endpoints.FooEndpoint, decodeFooRequest, encodeFooResponse, options...))
+// makeGetsHandler creates the handler logic
+func makeGetsHandler(m *http.ServeMux, endpoints endpoint.Endpoints, options []http1.ServerOption) {
+	m.Handle("/gets", http1.NewServer(endpoints.GetsEndpoint, decodeGetsRequest, encodeGetsResponse, options...))
 }
 
-// decodeFooRequest is a transport/http.DecodeRequestFunc that decodes a
+// decodeGetsRequest is a transport/http.DecodeRequestFunc that decodes a
 // JSON-encoded request from the HTTP request body.
-func decodeFooRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	req := endpoint.FooRequest{}
+func decodeGetsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	req := endpoint.GetsRequest{}
 	err := json.NewDecoder(r.Body).Decode(&req)
 	return req, err
 }
 
-// encodeFooResponse is a transport/http.EncodeResponseFunc that encodes
+// encodeGetsResponse is a transport/http.EncodeResponseFunc that encodes
 // the response as JSON to the response writer
-func encodeFooResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
+func encodeGetsResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
+	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
+		ErrorEncoder(ctx, f.Failed(), w)
+		return nil
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	err = json.NewEncoder(w).Encode(response)
+	return
+}
+
+// makeBarHandler creates the handler logic
+func makeBarHandler(m *http.ServeMux, endpoints endpoint.Endpoints, options []http1.ServerOption) {
+	m.Handle("/bar", http1.NewServer(endpoints.BarEndpoint, decodeBarRequest, encodeBarResponse, options...))
+}
+
+// decodeBarRequest is a transport/http.DecodeRequestFunc that decodes a
+// JSON-encoded request from the HTTP request body.
+func decodeBarRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	req := endpoint.BarRequest{}
+	err := json.NewDecoder(r.Body).Decode(&req)
+	return req, err
+}
+
+// encodeBarResponse is a transport/http.EncodeResponseFunc that encodes
+// the response as JSON to the response writer
+func encodeBarResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
 	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
 		ErrorEncoder(ctx, f.Failed(), w)
 		return nil

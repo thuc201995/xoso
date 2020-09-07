@@ -26,12 +26,20 @@ func New(instance string, options map[string][]http.ClientOption) (service.XosoS
 	if err != nil {
 		return nil, err
 	}
-	var fooEndpoint endpoint.Endpoint
+	var getsEndpoint endpoint.Endpoint
 	{
-		fooEndpoint = http.NewClient("POST", copyURL(u, "/foo"), encodeHTTPGenericRequest, decodeFooResponse, options["Foo"]...).Endpoint()
+		getsEndpoint = http.NewClient("POST", copyURL(u, "/gets"), encodeHTTPGenericRequest, decodeGetsResponse, options["Gets"]...).Endpoint()
 	}
 
-	return endpoint1.Endpoints{FooEndpoint: fooEndpoint}, nil
+	var barEndpoint endpoint.Endpoint
+	{
+		barEndpoint = http.NewClient("POST", copyURL(u, "/bar"), encodeHTTPGenericRequest, decodeBarResponse, options["Bar"]...).Endpoint()
+	}
+
+	return endpoint1.Endpoints{
+		BarEndpoint:  barEndpoint,
+		GetsEndpoint: getsEndpoint,
+	}, nil
 }
 
 // EncodeHTTPGenericRequest is a transport/http.EncodeRequestFunc that
@@ -46,15 +54,28 @@ func encodeHTTPGenericRequest(_ context.Context, r *http1.Request, request inter
 	return nil
 }
 
-// decodeFooResponse is a transport/http.DecodeResponseFunc that decodes
+// decodeGetsResponse is a transport/http.DecodeResponseFunc that decodes
 // a JSON-encoded concat response from the HTTP response body. If the response
 // as a non-200 status code, we will interpret that as an error and attempt to
 //  decode the specific error message from the response body.
-func decodeFooResponse(_ context.Context, r *http1.Response) (interface{}, error) {
+func decodeGetsResponse(_ context.Context, r *http1.Response) (interface{}, error) {
 	if r.StatusCode != http1.StatusOK {
 		return nil, http2.ErrorDecoder(r)
 	}
-	var resp endpoint1.FooResponse
+	var resp endpoint1.GetsResponse
+	err := json.NewDecoder(r.Body).Decode(&resp)
+	return resp, err
+}
+
+// decodeBarResponse is a transport/http.DecodeResponseFunc that decodes
+// a JSON-encoded concat response from the HTTP response body. If the response
+// as a non-200 status code, we will interpret that as an error and attempt to
+//  decode the specific error message from the response body.
+func decodeBarResponse(_ context.Context, r *http1.Response) (interface{}, error) {
+	if r.StatusCode != http1.StatusOK {
+		return nil, http2.ErrorDecoder(r)
+	}
+	var resp endpoint1.BarResponse
 	err := json.NewDecoder(r.Body).Decode(&resp)
 	return resp, err
 }

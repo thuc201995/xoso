@@ -1,17 +1,42 @@
 package service
 
-import "context"
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+type XSMN struct {
+	Date         time.Time `bson:"date"`
+	Code         string    `bson:"code"`
+	ProvinceCode string    `bson:"province_code"`
+	Prize8       string    `bson:"prize_8"`
+	Prize7       string    `bson:"prize_7"`
+	Prize6       []string  `bson:"prize_6"`
+	Prize5       string    `bson:"prize_5"`
+	Prize4       []string  `bson:"prize_4"`
+	Prize3       []string  `bson:"prize_3"`
+	Prize2       string    `bson:"prize_2"`
+	Prize1       string    `bson:"prize_1"`
+	PrizeDB      string    `bson:"prize_db"`
+}
 
 // XosoService describes the service.
 type XosoService interface {
 	// Add your methods here
-	Foo(ctx context.Context, s string) (rs string, err error)
+	Gets(ctx context.Context, date string) (rs XSMN, err error)
+	Bar(ctx context.Context, s string) (rs string, err error)
 }
 
 type basicXosoService struct{}
 
-func (b *basicXosoService) Foo(ctx context.Context, s string) (rs string, err error) {
-	// TODO implement the business logic of Foo
+func (b *basicXosoService) Gets(ctx context.Context, date string) (rs XSMN, err error) {
+	// TODO implement the business logic of Gets
+	fmt.Println(date)
+	return rs, err
+}
+func (b *basicXosoService) Bar(ctx context.Context, s string) (rs string, err error) {
+	// TODO implement the business logic of Bar
 	return rs, err
 }
 

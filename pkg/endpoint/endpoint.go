@@ -6,23 +6,23 @@ import (
 	service "github.com/thuc201995/xoso/pkg/service"
 )
 
-// FooRequest collects the request parameters for the Foo method.
-type FooRequest struct {
-	S string `json:"s"`
+// GetsRequest collects the request parameters for the Gets method.
+type GetsRequest struct {
+	Date string `json:"date"`
 }
 
-// FooResponse collects the response parameters for the Foo method.
-type FooResponse struct {
-	Rs  string `json:"rs"`
-	Err error  `json:"err"`
+// GetsResponse collects the response parameters for the Gets method.
+type GetsResponse struct {
+	Rs  service.XSMN `json:"rs"`
+	Err error        `json:"err"`
 }
 
-// MakeFooEndpoint returns an endpoint that invokes Foo on the service.
-func MakeFooEndpoint(s service.XosoService) endpoint.Endpoint {
+// MakeGetsEndpoint returns an endpoint that invokes Gets on the service.
+func MakeGetsEndpoint(s service.XosoService) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(FooRequest)
-		rs, err := s.Foo(ctx, req.S)
-		return FooResponse{
+		req := request.(GetsRequest)
+		rs, err := s.Gets(ctx, req.Date)
+		return GetsResponse{
 			Err: err,
 			Rs:  rs,
 		}, nil
@@ -30,7 +30,35 @@ func MakeFooEndpoint(s service.XosoService) endpoint.Endpoint {
 }
 
 // Failed implements Failer.
-func (r FooResponse) Failed() error {
+func (r GetsResponse) Failed() error {
+	return r.Err
+}
+
+// BarRequest collects the request parameters for the Bar method.
+type BarRequest struct {
+	S string `json:"s"`
+}
+
+// BarResponse collects the response parameters for the Bar method.
+type BarResponse struct {
+	Rs  string `json:"rs"`
+	Err error  `json:"err"`
+}
+
+// MakeBarEndpoint returns an endpoint that invokes Bar on the service.
+func MakeBarEndpoint(s service.XosoService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(BarRequest)
+		rs, err := s.Bar(ctx, req.S)
+		return BarResponse{
+			Err: err,
+			Rs:  rs,
+		}, nil
+	}
+}
+
+// Failed implements Failer.
+func (r BarResponse) Failed() error {
 	return r.Err
 }
 
@@ -41,12 +69,22 @@ type Failure interface {
 	Failed() error
 }
 
-// Foo implements Service. Primarily useful in a client.
-func (e Endpoints) Foo(ctx context.Context, s string) (rs string, err error) {
-	request := FooRequest{S: s}
-	response, err := e.FooEndpoint(ctx, request)
+// Gets implements Service. Primarily useful in a client.
+func (e Endpoints) Gets(ctx context.Context, date string) (rs service.XSMN, err error) {
+	request := GetsRequest{Date: date}
+	response, err := e.GetsEndpoint(ctx, request)
 	if err != nil {
 		return
 	}
-	return response.(FooResponse).Rs, response.(FooResponse).Err
+	return response.(GetsResponse).Rs, response.(GetsResponse).Err
+}
+
+// Bar implements Service. Primarily useful in a client.
+func (e Endpoints) Bar(ctx context.Context, s string) (rs string, err error) {
+	request := BarRequest{S: s}
+	response, err := e.BarEndpoint(ctx, request)
+	if err != nil {
+		return
+	}
+	return response.(BarResponse).Rs, response.(BarResponse).Err
 }

@@ -4,6 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net"
+	http2 "net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	endpoint1 "github.com/go-kit/kit/endpoint"
 	log "github.com/go-kit/kit/log"
 	lightsteptracergo "github.com/lightstep/lightstep-tracer-go"
@@ -16,13 +22,8 @@ import (
 	endpoint "github.com/thuc201995/xoso/pkg/endpoint"
 	http1 "github.com/thuc201995/xoso/pkg/http"
 	service "github.com/thuc201995/xoso/pkg/service"
-	"net"
-	http2 "net/http"
-	"os"
-	"os/signal"
 	appdash "sourcegraph.com/sourcegraph/appdash"
 	opentracing "sourcegraph.com/sourcegraph/appdash/opentracing"
-	"syscall"
 )
 
 var tracer opentracinggo.Tracer

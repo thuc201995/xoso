@@ -10,15 +10,22 @@ import (
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
 type Endpoints struct {
-	FooEndpoint endpoint.Endpoint
+	GetsEndpoint endpoint.Endpoint
+	BarEndpoint  endpoint.Endpoint
 }
 
 // New returns a Endpoints struct that wraps the provided service, and wires in all of the
 // expected endpoint middlewares
 func New(s service.XosoService, mdw map[string][]endpoint.Middleware) Endpoints {
-	eps := Endpoints{FooEndpoint: MakeFooEndpoint(s)}
-	for _, m := range mdw["Foo"] {
-		eps.FooEndpoint = m(eps.FooEndpoint)
+	eps := Endpoints{
+		BarEndpoint:  MakeBarEndpoint(s),
+		GetsEndpoint: MakeGetsEndpoint(s),
+	}
+	for _, m := range mdw["Gets"] {
+		eps.GetsEndpoint = m(eps.GetsEndpoint)
+	}
+	for _, m := range mdw["Bar"] {
+		eps.BarEndpoint = m(eps.BarEndpoint)
 	}
 	return eps
 }
