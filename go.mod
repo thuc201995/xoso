@@ -12,7 +12,8 @@ require (
 	github.com/openzipkin-contrib/zipkin-go-opentracing v0.4.5
 	github.com/openzipkin/zipkin-go v0.2.3
 	github.com/prometheus/client_golang v1.7.1
-	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
+	go.mongodb.org/mongo-driver v1.4.1
+	golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 	google.golang.org/grpc v1.30.0
 	google.golang.org/protobuf v1.25.0
 	sourcegraph.com/sourcegraph/appdash v0.0.0-20190731080439-ebfcffb1b5c0

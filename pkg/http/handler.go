@@ -4,52 +4,35 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	http1 "github.com/go-kit/kit/transport/http"
-	endpoint "github.com/thuc201995/xoso/pkg/endpoint"
 	"net/http"
+
+	http1 "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
+	"github.com/thuc201995/xoso/pkg/config"
+	endpoint "github.com/thuc201995/xoso/pkg/endpoint"
 )
 
-// makeGetsHandler creates the handler logic
-func makeGetsHandler(m *http.ServeMux, endpoints endpoint.Endpoints, options []http1.ServerOption) {
-	m.Handle("/gets", http1.NewServer(endpoints.GetsEndpoint, decodeGetsRequest, encodeGetsResponse, options...))
+// makeGetByDateHandler creates the handler logic
+func makeGetByDateHandler(m *mux.Router, endpoints endpoint.Endpoints, options []http1.ServerOption) {
+	m.Methods("GET").Path("/gets/date/{date}").Handler(http1.NewServer(endpoints.GetByDateEndpoint, decodeGetByDateRequest, encodeGetByDateResponse, options...))
 }
 
-// decodeGetsRequest is a transport/http.DecodeRequestFunc that decodes a
+// decodeGetByDateRequest is a transport/http.DecodeRequestFunc that decodes a
 // JSON-encoded request from the HTTP request body.
-func decodeGetsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	req := endpoint.GetsRequest{}
-	err := json.NewDecoder(r.Body).Decode(&req)
-	return req, err
-}
+func decodeGetByDateRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
+	date := mux.Vars(r)["date"]
 
-// encodeGetsResponse is a transport/http.EncodeResponseFunc that encodes
-// the response as JSON to the response writer
-func encodeGetsResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
-	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
-		ErrorEncoder(ctx, f.Failed(), w)
-		return nil
+	if date == "" {
+		err = config.NoBodyData
 	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	err = json.NewEncoder(w).Encode(response)
-	return
-}
+	req = endpoint.GetByDateRequest{Date: date}
 
-// makeBarHandler creates the handler logic
-func makeBarHandler(m *http.ServeMux, endpoints endpoint.Endpoints, options []http1.ServerOption) {
-	m.Handle("/bar", http1.NewServer(endpoints.BarEndpoint, decodeBarRequest, encodeBarResponse, options...))
-}
-
-// decodeBarRequest is a transport/http.DecodeRequestFunc that decodes a
-// JSON-encoded request from the HTTP request body.
-func decodeBarRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	req := endpoint.BarRequest{}
-	err := json.NewDecoder(r.Body).Decode(&req)
 	return req, err
 }
 
-// encodeBarResponse is a transport/http.EncodeResponseFunc that encodes
+// encodeGetByDateResponse is a transport/http.EncodeResponseFunc that encodes
 // the response as JSON to the response writer
-func encodeBarResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
+func encodeGetByDateResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
 	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
 		ErrorEncoder(ctx, f.Failed(), w)
 		return nil
@@ -73,9 +56,44 @@ func ErrorDecoder(r *http.Response) error {
 // This is used to set the http status, see an example here :
 // https://github.com/go-kit/kit/blob/master/examples/addsvc/pkg/addtransport/http.go#L133
 func err2code(err error) int {
+	switch err {
+	case config.DateTimeError, config.NoBodyData:
+		return http.StatusBadRequest
+	}
 	return http.StatusInternalServerError
 }
 
 type errorWrapper struct {
 	Error string `json:"error"`
+}
+
+// makeGetByProvinceHandler creates the handler logic
+func makeGetByProvinceHandler(m *mux.Router, endpoints endpoint.Endpoints, options []http1.ServerOption) {
+	m.Methods("GET").Path("/get/province/{province}/date/{date}").Handler(http1.NewServer(endpoints.GetByProvinceEndpoint, decodeGetByProvinceRequest, encodeGetByProvinceResponse, options...))
+}
+
+// decodeGetByProvinceRequest is a transport/http.DecodeRequestFunc that decodes a
+// JSON-encoded request from the HTTP request body.
+func decodeGetByProvinceRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
+	vars := mux.Vars(r)
+	date := vars["date"]
+	province := vars["province"]
+	if date == "" || province == "" {
+		err = config.NoBodyData
+	}
+	req = endpoint.GetByProvinceRequest{Date: date, Province: province}
+
+	return req, err
+}
+
+// encodeGetByProvinceResponse is a transport/http.EncodeResponseFunc that encodes
+// the response as JSON to the response writer
+func encodeGetByProvinceResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
+	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
+		ErrorEncoder(ctx, f.Failed(), w)
+		return nil
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	err = json.NewEncoder(w).Encode(response)
+	return
 }

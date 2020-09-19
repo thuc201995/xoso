@@ -4,39 +4,57 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/thuc201995/xoso/pkg/config"
+	"github.com/thuc201995/xoso/pkg/db"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type XSMN struct {
-	Date         time.Time `bson:"date"`
-	Code         string    `bson:"code"`
-	ProvinceCode string    `bson:"province_code"`
-	Prize8       string    `bson:"prize_8"`
-	Prize7       string    `bson:"prize_7"`
-	Prize6       []string  `bson:"prize_6"`
-	Prize5       string    `bson:"prize_5"`
-	Prize4       []string  `bson:"prize_4"`
-	Prize3       []string  `bson:"prize_3"`
-	Prize2       string    `bson:"prize_2"`
-	Prize1       string    `bson:"prize_1"`
-	PrizeDB      string    `bson:"prize_db"`
+	ID           string    `bson:"_id" json:"id"`
+	Date         time.Time `bson:"date" json:"date"`
+	Code         string    `bson:"code" json:"code"`
+	ProvinceCode string    `bson:"province_code" json:"province_code"`
+	Prize8       string    `bson:"prize_8" json:"prize_8"`
+	Prize7       string    `bson:"prize_7" json:"prize_7"`
+	Prize6       []string  `bson:"prize_6" json:"prize_6"`
+	Prize5       string    `bson:"prize_5" json:"prize_5"`
+	Prize4       []string  `bson:"prize_4" json:"prize_4"`
+	Prize3       []string  `bson:"prize_3" json:"prize_3"`
+	Prize2       string    `bson:"prize_2" json:"prize_2"`
+	Prize1       string    `bson:"prize_1" json:"prize_1"`
+	PrizeDB      string    `bson:"prize_db" json:"prize_db"`
 }
 
 // XosoService describes the service.
 type XosoService interface {
 	// Add your methods here
-	Gets(ctx context.Context, date string) (rs XSMN, err error)
-	Bar(ctx context.Context, s string) (rs string, err error)
+	GetByDate(ctx context.Context, date string) (rs []XSMN, err error)
+	GetByProvince(ctx context.Context, date string, province string) (rs XSMN, err error)
 }
 
 type basicXosoService struct{}
 
-func (b *basicXosoService) Gets(ctx context.Context, date string) (rs XSMN, err error) {
-	// TODO implement the business logic of Gets
+func (b *basicXosoService) GetByDate(ctx context.Context, date string) (rs []XSMN, err error) {
+	// TODO implement the business logic of GetByDate
+	var t time.Time
+	client, err := db.GetMongoClient()
+	if err != nil {
+		return rs, err
+	}
 	fmt.Println(date)
-	return rs, err
-}
-func (b *basicXosoService) Bar(ctx context.Context, s string) (rs string, err error) {
-	// TODO implement the business logic of Bar
+	collection := client.Database("test").Collection("xsmn")
+	t, err = time.Parse("02-01-2006", date)
+	if err != nil {
+		return rs, config.DateTimeError
+	}
+	data, err1 := collection.Find(ctx, bson.M{"date": t})
+	if err1 != nil {
+		return rs, err
+	}
+	if err = data.All(ctx, &rs); err != nil {
+		return rs, err
+	}
 	return rs, err
 }
 
@@ -52,4 +70,23 @@ func New(middleware []Middleware) XosoService {
 		svc = m(svc)
 	}
 	return svc
+}
+
+func (b *basicXosoService) GetByProvince(ctx context.Context, date string, province string) (rs XSMN, err error) {
+	var t time.Time
+	client, err := db.GetMongoClient()
+	if err != nil {
+		return rs, err
+	}
+	collection := client.Database("test").Collection("xsmn")
+	t, err = time.Parse("02-01-2006", date)
+	if err != nil {
+		return rs, config.DateTimeError
+	}
+	err = collection.FindOne(ctx, bson.M{"date": t, "province_code": province}).Decode(&rs)
+	if err != nil {
+		return rs, err
+	}
+
+	return rs, err
 }

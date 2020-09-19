@@ -2,16 +2,18 @@
 package http
 
 import (
-	http "github.com/go-kit/kit/transport/http"
-	endpoint "github.com/thuc201995/xoso/pkg/endpoint"
 	http1 "net/http"
+
+	http "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
+	endpoint "github.com/thuc201995/xoso/pkg/endpoint"
 )
 
 // NewHTTPHandler returns a handler that makes a set of endpoints available on
 // predefined paths.
 func NewHTTPHandler(endpoints endpoint.Endpoints, options map[string][]http.ServerOption) http1.Handler {
-	m := http1.NewServeMux()
-	makeGetsHandler(m, endpoints, options["Gets"])
-	makeBarHandler(m, endpoints, options["Bar"])
+	m := mux.NewRouter()
+	makeGetByDateHandler(m, endpoints, options["GetByDate"])
+	makeGetByProvinceHandler(m, endpoints, options["GetByProvince"])
 	return m
 }
