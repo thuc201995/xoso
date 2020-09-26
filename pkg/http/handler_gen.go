@@ -15,5 +15,7 @@ func NewHTTPHandler(endpoints endpoint.Endpoints, options map[string][]http.Serv
 	m := mux.NewRouter()
 	makeGetByDateHandler(m, endpoints, options["GetByDate"])
 	makeGetByProvinceHandler(m, endpoints, options["GetByProvince"])
+	makeGetXSMTByDateHandler(m, endpoints, options["GetXSMTByDate"])
+	makeGetMTByProvinceHandler(m, endpoints, options["GetMTByProvince"])
 	return m
 }

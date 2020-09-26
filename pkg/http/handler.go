@@ -14,7 +14,7 @@ import (
 
 // makeGetByDateHandler creates the handler logic
 func makeGetByDateHandler(m *mux.Router, endpoints endpoint.Endpoints, options []http1.ServerOption) {
-	m.Methods("GET").Path("/gets/date/{date}").Handler(http1.NewServer(endpoints.GetByDateEndpoint, decodeGetByDateRequest, encodeGetByDateResponse, options...))
+	m.Methods("GET").Path("/xsmn/gets/date/{date}").Handler(http1.NewServer(endpoints.GetByDateEndpoint, decodeGetByDateRequest, encodeGetByDateResponse, options...))
 }
 
 // decodeGetByDateRequest is a transport/http.DecodeRequestFunc that decodes a
@@ -89,6 +89,66 @@ func decodeGetByProvinceRequest(_ context.Context, r *http.Request) (req interfa
 // encodeGetByProvinceResponse is a transport/http.EncodeResponseFunc that encodes
 // the response as JSON to the response writer
 func encodeGetByProvinceResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
+	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
+		ErrorEncoder(ctx, f.Failed(), w)
+		return nil
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	err = json.NewEncoder(w).Encode(response)
+	return
+}
+
+// makeGetXSMTByDateHandler creates the handler logic
+func makeGetXSMTByDateHandler(m *mux.Router, endpoints endpoint.Endpoints, options []http1.ServerOption) {
+	m.Methods("GET").Path("/xsmt/gets/date/{date}").Handler(http1.NewServer(endpoints.GetXSMTByDateEndpoint, decodeGetXSMTByDateRequest, encodeGetXSMTByDateResponse, options...))
+}
+
+// decodeGetXSMTByDateRequest is a transport/http.DecodeRequestFunc that decodes a
+// JSON-encoded request from the HTTP request body.
+func decodeGetXSMTByDateRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
+	date := mux.Vars(r)["date"]
+	if date == "" {
+		err = config.NoBodyData
+	}
+	req = endpoint.GetXSMTByDateRequest{Date: date}
+
+	return req, err
+}
+
+// encodeGetXSMTByDateResponse is a transport/http.EncodeResponseFunc that encodes
+// the response as JSON to the response writer
+func encodeGetXSMTByDateResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
+	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
+		ErrorEncoder(ctx, f.Failed(), w)
+		return nil
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	err = json.NewEncoder(w).Encode(response)
+	return
+}
+
+// makeGetMTByProvinceHandler creates the handler logic
+func makeGetMTByProvinceHandler(m *mux.Router, endpoints endpoint.Endpoints, options []http1.ServerOption) {
+	m.Methods("GET").Path("/xsmt/get/province/{province}/date/{date}").Handler(http1.NewServer(endpoints.GetMTByProvinceEndpoint, decodeGetMTByProvinceRequest, encodeGetMTByProvinceResponse, options...))
+}
+
+// decodeGetMTByProvinceRequest is a transport/http.DecodeRequestFunc that decodes a
+// JSON-encoded request from the HTTP request body.
+func decodeGetMTByProvinceRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
+	vars := mux.Vars(r)
+	date := vars["date"]
+	province := vars["province"]
+	if date == "" || province == "" {
+		err = config.NoBodyData
+	}
+
+	req = endpoint.GetMTByProvinceRequest{Date: date, Province: province}
+	return req, err
+}
+
+// encodeGetMTByProvinceResponse is a transport/http.EncodeResponseFunc that encodes
+// the response as JSON to the response writer
+func encodeGetMTByProvinceResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
 	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
 		ErrorEncoder(ctx, f.Failed(), w)
 		return nil
