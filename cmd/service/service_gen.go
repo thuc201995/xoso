@@ -21,13 +21,15 @@ func defaultHttpOptions(logger log.Logger, tracer opentracinggo.Tracer) map[stri
 	options := map[string][]http.ServerOption{
 		"GetByDate":       {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "GetByDate", logger))},
 		"GetByProvince":   {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "GetByProvince", logger))},
+		"GetMBByProvince": {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "GetMBByProvince", logger))},
 		"GetMTByProvince": {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "GetMTByProvince", logger))},
+		"GetXSMBByDate":   {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "GetXSMBByDate", logger))},
 		"GetXSMTByDate":   {http.ServerErrorEncoder(http1.ErrorEncoder), http.ServerErrorLogger(logger), http.ServerBefore(opentracing.HTTPToContext(tracer, "GetXSMTByDate", logger))},
 	}
 	return options
 }
 func addEndpointMiddlewareToAllMethods(mw map[string][]endpoint1.Middleware, m endpoint1.Middleware) {
-	methods := []string{"GetByDate", "GetByProvince", "GetXSMTByDate", "GetMTByProvince"}
+	methods := []string{"GetByDate", "GetByProvince", "GetXSMTByDate", "GetMTByProvince", "GetXSMBByDate", "GetMBByProvince"}
 	for _, v := range methods {
 		mw[v] = append(mw[v], m)
 	}

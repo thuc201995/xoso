@@ -174,3 +174,83 @@ func (e Endpoints) GetMTByProvince(ctx context.Context, date string, province st
 	}
 	return response.(GetMTByProvinceResponse).Rs, response.(GetMTByProvinceResponse).Err
 }
+
+// GetXSMBByDateRequest collects the request parameters for the GetXSMBByDate method.
+type GetXSMBByDateRequest struct {
+	Date string `json:"date"`
+}
+
+// GetXSMBByDateResponse collects the response parameters for the GetXSMBByDate method.
+type GetXSMBByDateResponse struct {
+	Rs  []service.XSMB `json:"rs"`
+	Err error          `json:"err"`
+}
+
+// MakeGetXSMBByDateEndpoint returns an endpoint that invokes GetXSMBByDate on the service.
+func MakeGetXSMBByDateEndpoint(s service.XosoService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(GetXSMBByDateRequest)
+		rs, err := s.GetXSMBByDate(ctx, req.Date)
+		return GetXSMBByDateResponse{
+			Err: err,
+			Rs:  rs,
+		}, nil
+	}
+}
+
+// Failed implements Failer.
+func (r GetXSMBByDateResponse) Failed() error {
+	return r.Err
+}
+
+// GetXSMBByDate implements Service. Primarily useful in a client.
+func (e Endpoints) GetXSMBByDate(ctx context.Context, date string) (rs []service.XSMB, err error) {
+	request := GetXSMBByDateRequest{Date: date}
+	response, err := e.GetXSMBByDateEndpoint(ctx, request)
+	if err != nil {
+		return
+	}
+	return response.(GetXSMBByDateResponse).Rs, response.(GetXSMBByDateResponse).Err
+}
+
+// GetMBByProvinceRequest collects the request parameters for the GetMBByProvince method.
+type GetMBByProvinceRequest struct {
+	Date     string `json:"date"`
+	Province string `json:"province"`
+}
+
+// GetMBByProvinceResponse collects the response parameters for the GetMBByProvince method.
+type GetMBByProvinceResponse struct {
+	Rs  service.XSMB `json:"rs"`
+	Err error        `json:"err"`
+}
+
+// MakeGetMBByProvinceEndpoint returns an endpoint that invokes GetMBByProvince on the service.
+func MakeGetMBByProvinceEndpoint(s service.XosoService) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(GetMBByProvinceRequest)
+		rs, err := s.GetMBByProvince(ctx, req.Date, req.Province)
+		return GetMBByProvinceResponse{
+			Err: err,
+			Rs:  rs,
+		}, nil
+	}
+}
+
+// Failed implements Failer.
+func (r GetMBByProvinceResponse) Failed() error {
+	return r.Err
+}
+
+// GetMBByProvince implements Service. Primarily useful in a client.
+func (e Endpoints) GetMBByProvince(ctx context.Context, date string, province string) (rs service.XSMB, err error) {
+	request := GetMBByProvinceRequest{
+		Date:     date,
+		Province: province,
+	}
+	response, err := e.GetMBByProvinceEndpoint(ctx, request)
+	if err != nil {
+		return
+	}
+	return response.(GetMBByProvinceResponse).Rs, response.(GetMBByProvinceResponse).Err
+}

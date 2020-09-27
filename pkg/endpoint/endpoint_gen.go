@@ -14,6 +14,8 @@ type Endpoints struct {
 	GetByProvinceEndpoint   endpoint.Endpoint
 	GetXSMTByDateEndpoint   endpoint.Endpoint
 	GetMTByProvinceEndpoint endpoint.Endpoint
+	GetXSMBByDateEndpoint   endpoint.Endpoint
+	GetMBByProvinceEndpoint endpoint.Endpoint
 }
 
 // New returns a Endpoints struct that wraps the provided service, and wires in all of the
@@ -22,7 +24,9 @@ func New(s service.XosoService, mdw map[string][]endpoint.Middleware) Endpoints 
 	eps := Endpoints{
 		GetByDateEndpoint:       MakeGetByDateEndpoint(s),
 		GetByProvinceEndpoint:   MakeGetByProvinceEndpoint(s),
+		GetMBByProvinceEndpoint: MakeGetMBByProvinceEndpoint(s),
 		GetMTByProvinceEndpoint: MakeGetMTByProvinceEndpoint(s),
+		GetXSMBByDateEndpoint:   MakeGetXSMBByDateEndpoint(s),
 		GetXSMTByDateEndpoint:   MakeGetXSMTByDateEndpoint(s),
 	}
 	for _, m := range mdw["GetByDate"] {
@@ -36,6 +40,12 @@ func New(s service.XosoService, mdw map[string][]endpoint.Middleware) Endpoints 
 	}
 	for _, m := range mdw["GetMTByProvince"] {
 		eps.GetMTByProvinceEndpoint = m(eps.GetMTByProvinceEndpoint)
+	}
+	for _, m := range mdw["GetXSMBByDate"] {
+		eps.GetXSMBByDateEndpoint = m(eps.GetXSMBByDateEndpoint)
+	}
+	for _, m := range mdw["GetMBByProvince"] {
+		eps.GetMBByProvinceEndpoint = m(eps.GetMBByProvinceEndpoint)
 	}
 	return eps
 }

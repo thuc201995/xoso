@@ -17,5 +17,7 @@ func NewHTTPHandler(endpoints endpoint.Endpoints, options map[string][]http.Serv
 	makeGetByProvinceHandler(m, endpoints, options["GetByProvince"])
 	makeGetXSMTByDateHandler(m, endpoints, options["GetXSMTByDate"])
 	makeGetMTByProvinceHandler(m, endpoints, options["GetMTByProvince"])
+	makeGetXSMBByDateHandler(m, endpoints, options["GetXSMBByDate"])
+	makeGetMBByProvinceHandler(m, endpoints, options["GetMBByProvince"])
 	return m
 }

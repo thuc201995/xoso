@@ -157,3 +157,64 @@ func encodeGetMTByProvinceResponse(ctx context.Context, w http.ResponseWriter, r
 	err = json.NewEncoder(w).Encode(response)
 	return
 }
+
+// makeGetXSMBByDateHandler creates the handler logic
+func makeGetXSMBByDateHandler(m *mux.Router, endpoints endpoint.Endpoints, options []http1.ServerOption) {
+	m.Methods("GET").Path("/xsmb/gets/date/{date}").Handler(http1.NewServer(endpoints.GetXSMBByDateEndpoint, decodeGetXSMBByDateRequest, encodeGetXSMBByDateResponse, options...))
+}
+
+// decodeGetXSMBByDateRequest is a transport/http.DecodeRequestFunc that decodes a
+// JSON-encoded request from the HTTP request body.
+func decodeGetXSMBByDateRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
+	date := mux.Vars(r)["date"]
+
+	if date == "" {
+		err = config.NoBodyData
+	}
+	req = endpoint.GetXSMBByDateRequest{Date: date}
+
+	return req, err
+}
+
+// encodeGetXSMBByDateResponse is a transport/http.EncodeResponseFunc that encodes
+// the response as JSON to the response writer
+func encodeGetXSMBByDateResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
+	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
+		ErrorEncoder(ctx, f.Failed(), w)
+		return nil
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	err = json.NewEncoder(w).Encode(response)
+	return
+}
+
+// makeGetMBByProvinceHandler creates the handler logic
+func makeGetMBByProvinceHandler(m *mux.Router, endpoints endpoint.Endpoints, options []http1.ServerOption) {
+	m.Methods("GET").Path("/xsmb/get/province/{province}/date/{date}").Handler(http1.NewServer(endpoints.GetMBByProvinceEndpoint, decodeGetMBByProvinceRequest, encodeGetMBByProvinceResponse, options...))
+}
+
+// decodeGetMBByProvinceRequest is a transport/http.DecodeRequestFunc that decodes a
+// JSON-encoded request from the HTTP request body.
+func decodeGetMBByProvinceRequest(_ context.Context, r *http.Request) (req interface{}, err error) {
+	vars := mux.Vars(r)
+	date := vars["date"]
+	province := vars["province"]
+	if date == "" || province == "" {
+		err = config.NoBodyData
+	}
+
+	req = endpoint.GetMBByProvinceRequest{Date: date, Province: province}
+	return req, err
+}
+
+// encodeGetMBByProvinceResponse is a transport/http.EncodeResponseFunc that encodes
+// the response as JSON to the response writer
+func encodeGetMBByProvinceResponse(ctx context.Context, w http.ResponseWriter, response interface{}) (err error) {
+	if f, ok := response.(endpoint.Failure); ok && f.Failed() != nil {
+		ErrorEncoder(ctx, f.Failed(), w)
+		return nil
+	}
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	err = json.NewEncoder(w).Encode(response)
+	return
+}
